@@ -89,6 +89,7 @@ public/
 - Portfolio navigation overhaul — clean solution for navigating between all pages
 - Add unique constraint on tmdb_id in Supabase to prevent duplicates at database level
 - Expand admin page (analytics, stats dashboard)
+- Compatibility with phone
 
 ## Decisions Made
 - Version control via terminal (git add, commit, push) — GitHub Desktop used for initial clone
