@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { IconFlag, IconClock } from '@tabler/icons-react'
 
 const PRESETS = [
   { label: 'Beginner', rows: 9, cols: 9, mines: 10 },
@@ -195,11 +196,15 @@ export default function Minesweeper() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', background: 'var(--bg-surface)', border: '0.5px solid var(--bg-border)', borderRadius: '8px', padding: '0.5rem 1.25rem' }}>
-          <span style={{ fontSize: '14px', fontWeight: 500, minWidth: '60px' }}>🚩 {flagsLeft}</span>
+          <span style={{ fontSize: '14px', fontWeight: 500, minWidth: '60px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <IconFlag size={16} stroke={1.5} /> {flagsLeft}
+          </span>
           <button onClick={reset} style={{ background: 'var(--bg-border)', border: 'none', borderRadius: '6px', padding: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <PixelFace state={gameState} />
           </button>
-          <span style={{ fontSize: '14px', fontWeight: 500, minWidth: '60px', textAlign: 'right' }}>⏱ {time}s</span>
+          <span style={{ fontSize: '14px', fontWeight: 500, minWidth: '60px', textAlign: 'right', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>
+            <IconClock size={16} stroke={1.5} /> {time}s
+          </span>
         </div>
       </div>
 

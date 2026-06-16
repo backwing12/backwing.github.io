@@ -1,16 +1,17 @@
 import { Link } from 'react-router-dom'
+import { IconMovie, IconBomb } from '@tabler/icons-react'
 
 const projects = [
   {
     label: 'Movies',
     path: '/movies',
-    icon: '🎬',
+    icon: <IconMovie size={20} stroke={1.5} />,
     desc: 'track, rate & discover films',
   },
   {
     label: 'Minesweeper',
     path: '/minesweeper',
-    icon: '💣',
+    icon: <IconBomb size={20} stroke={1.5} />,
     desc: 'the classic grid game',
   },
 ]

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../hooks/useAuth'
 
 const GENRES = [
   { id: 28, name: 'Action' }, { id: 12, name: 'Adventure' }, { id: 16, name: 'Animation' },
@@ -29,6 +30,8 @@ const DECADES = [
 ]
 
 function Movies() {
+  const { isAuthenticated, getToken } = useAuth()
+
   const [movie, setMovie] = useState(null)
   const [loading, setLoading] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -205,6 +208,16 @@ function Movies() {
         </div>
         <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '2rem' }}>Have you watched this movie?</p>
 
+        {!isAuthenticated && (
+          <div style={{
+            padding: '0.6rem 1rem', marginBottom: '1rem', borderRadius: '6px',
+            background: '#E24B4A20', border: '0.5px solid #E24B4A',
+            color: '#E24B4A', fontSize: '13px'
+          }}>
+            Not logged in — movies won't be saved.
+          </div>
+        )}
+
         {loading && <p style={{ color: 'var(--text-muted)' }}>Loading...</p>}
 
         {!loading && !movie && <p style={{ color: 'var(--text-muted)' }}>No movies found with these filters. Try adjusting them.</p>}
@@ -240,13 +253,18 @@ function Movies() {
                 </button>
                 <button
                   onClick={async () => {
-                    await fetch('/api/watched', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ tmdb_id: movie.id }),
-                    })
-                    setWatchedIds(prev => new Set([...prev, movie.id]))
-                    watchedIdsRef.current.add(movie.id)
+                    if (isAuthenticated) {
+                      await fetch('/api/watched', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'x-admin-token': getToken(),
+                        },
+                        body: JSON.stringify({ tmdb_id: movie.id }),
+                      })
+                      setWatchedIds(prev => new Set([...prev, movie.id]))
+                      watchedIdsRef.current.add(movie.id)
+                    }
                     fetchRandomMovie()
                   }}
                   style={{

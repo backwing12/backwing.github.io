@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { verifyToken } from './_verify.js'
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
@@ -6,6 +7,11 @@ const supabase = createClient(
 )
 
 export default async function handler(req, res) {
+  const token = req.headers['x-admin-token']
+  if (!token || !verifyToken(token)) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+  
   if (req.method === 'POST') {
     const { tmdb_id, rating, review } = req.body
     const { data, error } = await supabase
