@@ -3,6 +3,7 @@ import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import Movies from './pages/Movies'
 import Minesweeper from './pages/Minesweeper'
+import Catalogue from './pages/Catalogue'
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/movies" element={<Movies />} />
+        <Route path="/catalogue" element={<Catalogue />} />
         <Route path="/minesweeper" element={<Minesweeper />} />
       </Routes>
     </>

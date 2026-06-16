@@ -22,6 +22,7 @@ function Navbar() {
         {[
           { label: 'Movies', path: '/movies' },
           { label: 'Minesweeper', path: '/minesweeper' },
+          { label: 'Catalogue', path: '/catalogue' },
         ].map(({ label, path }) => (
           <Link
             key={path}

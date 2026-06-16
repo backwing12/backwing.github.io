@@ -46,24 +46,46 @@ public/
   - Timer and flag counter
   - Fixed 32px cell size, board centered, header locked to Expert width
 - Custom favicon (nested triangles, light-to-dark purple)
-- Supabase set up
+- Supabase setup
   - watched_movies table (id, created_at, tmdb_id, rating, review)
   - RLS enabled with public read policy
   - Writes handled via Vercel serverless functions using service key
 - Vercel serverless functions
-  - api/movie.js — TMDB proxy (hides API key)
+  - api/movie.js — TMDB proxy, handles all filter params
   - api/watched.js — Supabase writes (POST, PATCH, DELETE)
 - Environment variables set up in .env and Vercel dashboard
-- TMDB API connection tested and working
+- Movie Tinder (/movies)
+  - Random movie from TMDB with poster, title, year, overview
+  - Yes/No buttons — Yes saves to Supabase - No button session exclusions, excludes no movies until page refresh or filter change
+  - Filters: language, decade, genres, min votes, min rating
+  - Collapsible sidebar, open by default
+  - Duplicate prevention via watchedIds set
+  - Two-step fetch to avoid empty page results
+  - Filter auto updates (fixed issue of 2 movies loading on page load)
+- Catalogue (/catalogue)
+  - Fetches all watched movies from Supabase, enriches with TMDB data
+  - Compact list with small thumbnail, title, year, genres, runtime, rating, date
+  - Paginated at 20 per page
+  - Delete with confirmation
 
-## In Progress / Up Next
-- Movies page (/movies) — Movie Tinder
-  - Show random movie card (poster, title, year, genres, overview)
-  - Yes/No buttons to log as watched
-  - Filters (language, genre, year range etc.)
-  - Live sidebar showing recently watched
-- Catalogue page (/catalogue) — structured watched list
-  - All watched movies with ratings, reviews, useful info
+## In Progress
+- Admin / Auth system
+  - /admin route with login page
+  - Password stored in .env / Vercel env vars
+  - Token stored in localStorage with expiry
+  - Reusable useAuth hook
+  - Serverless functions check token in request headers
+  - Foundation for future: user management, analytics, access control
+
+## Up Next
+- Fix slow load times (image lazy loading / preloading)
+- Add rating and review editing per movie entry in Catalogue
+- Search / sort functionality in Catalogue (by title, genre, year, rating)
+- Search functionality for adding specific movies (Movie Tinder = casual discovery, Catalogue = intentional logging)
+- Additional lists ("Want to watch", "Need to rewatch", etc.)
+- CSS art gallery page (/art)
+- Start using proper icons instead of emojis
+- Portfolio navigation overhaul — clean solution for navigating between all pages
 
 ## Decisions Made
 - Version control via terminal (git add, commit, push) — GitHub Desktop used for initial clone
@@ -73,3 +95,5 @@ public/
 - Vercel serverless functions used for all API calls to hide keys
 - Use `vercel dev` instead of `npm run dev` to test serverless functions locally
 - Cell size fixed at 32px for Minesweeper
+- Movie Tinder: No button is session-only exclusion (resets on refresh/filter change)
+- Catalogue: paginated at 20 movies per page with small thumbnails (w92)

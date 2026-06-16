@@ -17,10 +17,11 @@ export default async function handler(req, res) {
 
   if (req.method === 'DELETE') {
     const { id } = req.body
+    const numericId = parseInt(id)
     const { data, error } = await supabase
       .from('watched_movies')
       .delete()
-      .eq('id', id)
+      .eq('id', numericId)
     if (error) return res.status(500).json({ error })
     return res.status(200).json(data)
   }
