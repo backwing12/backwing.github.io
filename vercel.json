@@ -1,5 +1,8 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/((?!src|node_modules|@vite|@react-refresh|api).*)",
+      "destination": "/index.html"
+    }
   ]
 }
