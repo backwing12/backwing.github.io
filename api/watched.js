@@ -17,6 +17,8 @@ export default async function handler(req, res) {
     const { data, error } = await supabase
       .from('watched_movies')
       .insert([{ tmdb_id, rating, review }])
+    // 23505 = unique violation (once tmdb_id has a unique constraint)
+    if (error?.code === '23505') return res.status(409).json({ error: 'Already in watched list' })
     if (error) return res.status(500).json({ error })
     return res.status(200).json(data)
   }

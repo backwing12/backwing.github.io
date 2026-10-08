@@ -1,35 +1,45 @@
 import { Link } from 'react-router-dom'
-import { IconMovie, IconBomb } from '@tabler/icons-react'
+import { IconMovie, IconBomb, IconSchool } from '@tabler/icons-react'
+import { schoolProjectsData } from '../data/SchoolProjectsData'
 
-const projects = [
+const personalProjects = [
   {
     label: 'Movies',
     path: '/movies',
     icon: <IconMovie size={20} stroke={1.5} />,
-    desc: 'track, rate & discover films',
+    desc: 'Track, rate and discover films',
   },
   {
     label: 'Minesweeper',
     path: '/minesweeper',
     icon: <IconBomb size={20} stroke={1.5} />,
-    desc: 'the classic grid game',
+    desc: 'The classic grid game',
   },
 ]
 
-function Home() {
+const schoolProjects = Object.entries(schoolProjectsData).map(([slug, project]) => ({
+  label: project.label,
+  path: `/school/${slug}`,
+  icon: <IconSchool size={20} stroke={1.5} />,
+  desc: project.description.length > 80
+    ? project.description.slice(0, 80).trim() + '…'
+    : project.description,
+}))
+
+function ProjectSection({ eyebrow, title, accentWord, description, items }) {
   return (
-    <main style={{ maxWidth: '680px', margin: '0 auto', padding: '4rem 2rem' }}>
-      <p style={{ fontSize: '12px', color: 'var(--text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
-        Personal projects
+    <section style={{ marginBottom: '3rem' }}>
+      <p style={{ fontSize: '12px', color: 'var(--text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+        {eyebrow}
       </p>
-      <h1 style={{ fontSize: '28px', fontWeight: 500, lineHeight: 1.2, marginBottom: '1rem' }}>
-        Things built by <span style={{ color: 'var(--accent)' }}>backwing</span>
-      </h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '3rem', maxWidth: '420px' }}>
-        A small collection of projects — a movie catalogue, and a minesweeper game.
+      <h2 style={{ fontSize: '20px', fontWeight: 500, lineHeight: 1.2, marginBottom: '0.5rem' }}>
+        {title} {accentWord && <span style={{ color: 'var(--accent)' }}>{accentWord}</span>}
+      </h2>
+      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', maxWidth: '480px', fontSize: '14px' }}>
+        {description}
       </p>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
-        {projects.map(({ label, path, icon, desc }) => (
+        {items.map(({ label, path, icon, desc }) => (
           <Link
             key={path}
             to={path}
@@ -50,6 +60,35 @@ function Home() {
           </Link>
         ))}
       </div>
+    </section>
+  )
+}
+
+function Home() {
+  return (
+    <main style={{ maxWidth: '680px', margin: '0 auto', padding: '4rem 2rem' }}>
+      <p style={{ fontSize: '12px', color: 'var(--text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
+        Projects
+      </p>
+      <h1 style={{ fontSize: '28px', fontWeight: 500, lineHeight: 1.2, marginBottom: '2.5rem' }}>
+        Things built by <span style={{ color: 'var(--accent)' }}>backwing</span>
+      </h1>
+
+      <ProjectSection
+        eyebrow="Just for fun"
+        title="Personal"
+        accentWord="projects"
+        description="A small collection of things I've built on my own time: a movie catalogue and a minesweeper game."
+        items={personalProjects}
+      />
+
+      <ProjectSection
+        eyebrow="From my degree"
+        title="School"
+        accentWord="projects"
+        description="Coursework and thesis work from my IT bachelor's."
+        items={schoolProjects}
+      />
     </main>
   )
 }

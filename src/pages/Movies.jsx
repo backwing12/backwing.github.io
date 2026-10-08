@@ -46,6 +46,7 @@ function Movies() {
   const watchedIdsRef = useRef(new Set())
   const [watchedLoaded, setWatchedLoaded] = useState(false)
   const skippedIdsRef = useRef(new Set())
+  const [saveError, setSaveError] = useState(null)
 
   useEffect(() => {
     const fetchWatched = async () => {
@@ -79,6 +80,7 @@ function Movies() {
 
   const fetchRandomMovie = async () => {
     setLoading(true)
+    setSaveError(null)
     
     // First fetch page 1 to get total pages
     const firstRes = await fetch(`/api/movie?${buildQueryParams(1)}`)
@@ -214,7 +216,17 @@ function Movies() {
             background: '#E24B4A20', border: '0.5px solid #E24B4A',
             color: '#E24B4A', fontSize: '13px'
           }}>
-            Not logged in — movies won't be saved.
+            Not logged in. Movies won't be saved.
+          </div>
+        )}
+
+        {saveError && (
+          <div style={{
+            padding: '0.6rem 1rem', marginBottom: '1rem', borderRadius: '6px',
+            background: '#E24B4A20', border: '0.5px solid #E24B4A',
+            color: '#E24B4A', fontSize: '13px'
+          }}>
+            {saveError}
           </div>
         )}
 
@@ -254,14 +266,27 @@ function Movies() {
                 <button
                   onClick={async () => {
                     if (isAuthenticated) {
-                      await fetch('/api/watched', {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                          'x-admin-token': getToken(),
-                        },
-                        body: JSON.stringify({ tmdb_id: movie.id }),
-                      })
+                      try {
+                        const res = await fetch('/api/watched', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'x-admin-token': getToken(),
+                          },
+                          body: JSON.stringify({ tmdb_id: movie.id }),
+                        })
+                        // 409 = already saved, treat as watched
+                        if (!res.ok && res.status !== 409) {
+                          setSaveError(res.status === 401
+                            ? 'Your login has expired. Log in again to save movies.'
+                            : `Could not save "${movie.title}". Try again.`)
+                          return
+                        }
+                      } catch (err) {
+                        console.error(err)
+                        setSaveError(`Network error. "${movie.title}" was not saved.`)
+                        return
+                      }
                       setWatchedIds(prev => new Set([...prev, movie.id]))
                       watchedIdsRef.current.add(movie.id)
                     }

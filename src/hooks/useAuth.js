@@ -1,14 +1,25 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 const TOKEN_KEY = 'admin_token'
 
-export function useAuth() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+// Reads the expiry from the token payload. The server still verifies the signature;
+// this only keeps the UI from showing "logged in" with an expired or old-format token.
+function getValidToken() {
+  const token = localStorage.getItem(TOKEN_KEY)
+  if (!token) return null
+  try {
+    const payload = token.split('.')[0].replace(/-/g, '+').replace(/_/g, '/')
+    const { exp } = JSON.parse(atob(payload))
+    if (typeof exp === 'number' && Date.now() < exp) return token
+  } catch {
+    // malformed or old-format token, fall through
+  }
+  localStorage.removeItem(TOKEN_KEY)
+  return null
+}
 
-  useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY)
-    if (token) setIsAuthenticated(true)
-  }, [])
+export function useAuth() {
+  const [isAuthenticated, setIsAuthenticated] = useState(() => getValidToken() !== null)
 
   const login = async (password) => {
     const res = await fetch('/api/auth', {
@@ -30,7 +41,7 @@ export function useAuth() {
     setIsAuthenticated(false)
   }
 
-  const getToken = () => localStorage.getItem(TOKEN_KEY)
+  const getToken = () => getValidToken()
 
   return { isAuthenticated, login, logout, getToken }
 }
