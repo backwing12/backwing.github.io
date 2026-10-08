@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/((?!src|node_modules|@vite|@react-refresh|api).*)",
+      "source": "/((?!src|node_modules|@vite|@react-refresh|api|projects|favicon.svg|icons.svg).*)",
       "destination": "/index.html"
     }
   ]

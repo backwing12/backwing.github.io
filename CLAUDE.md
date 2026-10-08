@@ -19,6 +19,7 @@ Personal portfolio site for Christopher Vosgraff (IT bachelor, USN 2025). Used i
 ## Running locally (Windows)
 - Use `vercel dev`, NOT `npm run dev`. Serverless functions in `api/` only run under `vercel dev`. Runs on localhost:3000.
 - `vercel.json` has a rewrite that excludes Vite internals (`src`, `node_modules`, `@vite`, `@react-refresh`, `api`). It fixes a Windows-specific Vite 8 + Vercel CLI bug. Do not remove it.
+- The rewrite also catches files in `public/` under `vercel dev` (prod is fine). New top-level files or folders in `public/` must be added to its exclusion list (currently `projects`, `favicon.svg`, `icons.svg`).
 - Harmless terminal assertion errors from Vercel CLI on Windows can be ignored.
 - If `vercel dev` says the token is invalid: run `vercel login`.
 - Vercel CLI auto-upgrade fails on Windows (`spawn npm ENOENT`). Upgrade manually with `npm i -g vercel@latest`.
@@ -73,8 +74,9 @@ Three projects in `src/data/SchoolProjectsData.js`, shown on Home and at `/schoo
 
 Remaining:
 - [x] Fix import casing in `SchoolProject.jsx` (`../data/SchoolProjectsData`)
-- [ ] Fill in `tech` and correct `groupSize` for each project (currently empty / 1). Old repos may help: `../APP2000`, `../PRO1000-G7`
-- [ ] Add screenshots to `public/projects/` (`web1100.png`, `pro1000.png`, `app2000.png`)
+- [x] Fill in `tech` and `groupSize` (all groups of 5). Old repos (`ShadXn/APP2000`, `Endreoh/PRO1000-G7`) are private, so no GitHub links
+- [x] Wayback Machine snapshots in `links.archive` (not shown on the page, fallback if sayver.net goes down). Screenshot box hides itself if the image is missing
+- [x] Screenshots in `public/projects/` (`*.webp`, 1440x900, captured with headless Chrome)
 - [ ] Add the bachelor thesis as a project: group of five, machine learning model detecting high-voltage infrastructure in LIDAR data
 - [ ] Remove the em-dashes in the descriptions if rewriting them
 

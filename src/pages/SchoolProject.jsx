@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { IconArrowLeft, IconBrandGithub, IconExternalLink } from '@tabler/icons-react'
 import { schoolProjectsData } from '../data/SchoolProjectsData'
@@ -5,6 +6,7 @@ import { schoolProjectsData } from '../data/SchoolProjectsData'
 function SchoolProject() {
   const { slug } = useParams()
   const project = schoolProjectsData[slug]
+  const [failedImage, setFailedImage] = useState(null)
 
   if (!project) {
     return (
@@ -35,7 +37,7 @@ function SchoolProject() {
         Back to projects
       </Link>
 
-      {image && (
+      {image && failedImage !== image && (
         <div style={{
           width: '100%',
           aspectRatio: '16 / 10',
@@ -49,6 +51,7 @@ function SchoolProject() {
             src={image}
             alt={`Screenshot of ${title}`}
             loading="lazy"
+            onError={() => setFailedImage(image)}
             style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }}
           />
         </div>
