@@ -77,7 +77,7 @@ Remaining:
 - [x] Fill in `tech` and `groupSize` (all groups of 5). Old repos (`ShadXn/APP2000`, `Endreoh/PRO1000-G7`) are private, so no GitHub links
 - [x] Wayback Machine snapshots in `links.archive` (not shown on the page, fallback if sayver.net goes down). Screenshot box hides itself if the image is missing
 - [x] Screenshots in `public/projects/` (`*.webp`, 1440x900, captured with headless Chrome)
-- [ ] Add the bachelor thesis as a project: group of five, machine learning model detecting high-voltage infrastructure in LIDAR data
+- Bachelor thesis (group of five, ML model detecting high-voltage infrastructure in LIDAR data): dropped for now, private repo and no demo. Can be shown on GitHub if an employer asks
 - [ ] Remove the em-dashes in the descriptions if rewriting them
 
 ## Known issues
@@ -85,8 +85,12 @@ Remaining:
 - Slow load times (images)
 
 ## Up next
-- Mobile compatibility
-- Aesthetic overhaul (considering warm dark background ~#141210, amber accent, DM Sans)
+- **Aesthetic overhaul + mobile (next session).** Decided 2026-10-08:
+  - Palette: amber. bg `#141210`, surface `#1d1a17`, border `#2e2925`, text `#f2ede6`, muted `#9a9088`, accent `#e8a54b`. Font stays DM Sans.
+  - Approach: a few shared CSS classes (button, card, eyebrow label, layouts) + media queries in `index.css`. Inline styles stay for one-offs.
+  - Mobile priority: Catalogue and Movie Tinder look worst. Minesweeper only light polish (hard to play on mobile anyway). School project pages already look good.
+  - Move hardcoded colors (`#E24B4A` ×18, `#ccc`, `#fff`) to CSS variables as part of this.
+- Small cleanups, offered but not yet approved: lint errors (unused vars in Minesweeper/Movies, Node globals for `api/` in eslint config), unused `src/App.css` and `public/icons.svg` (also remove from the `vercel.json` exclusion)
 - Rating/review editing and search/sort in Catalogue
 - Portfolio navigation overhaul
 
