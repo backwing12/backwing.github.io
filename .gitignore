@@ -26,3 +26,6 @@ dist-ssr
 
 .vercel
 .env*
+
+# Claude Code project notes (local only)
+CLAUDE.md
