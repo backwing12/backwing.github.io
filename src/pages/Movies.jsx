@@ -47,6 +47,7 @@ function Movies() {
   const [watchedLoaded, setWatchedLoaded] = useState(false)
   const skippedIdsRef = useRef(new Set())
   const [saveError, setSaveError] = useState(null)
+  const [fetchError, setFetchError] = useState(null)
 
   useEffect(() => {
     const fetchWatched = async () => {
@@ -78,38 +79,49 @@ function Movies() {
     return params.toString()
   }
 
+  const fetchPage = async (page) => {
+    const res = await fetch(`/api/movie?${buildQueryParams(page)}`)
+    if (!res.ok) throw new Error(`Movie API returned ${res.status}`)
+    return res.json()
+  }
+
   const fetchRandomMovie = async () => {
     setLoading(true)
     setSaveError(null)
-    
-    // First fetch page 1 to get total pages
-    const firstRes = await fetch(`/api/movie?${buildQueryParams(1)}`)
-    const firstData = await firstRes.json()
-    
-    if (!firstData.results || firstData.results.length === 0) {
-      setMovie(null)
-      setLoading(false)
-      return
-    }
+    setFetchError(null)
 
-    const totalPages = Math.min(firstData.total_pages, 300)
-    const randomPage = Math.floor(Math.random() * totalPages) + 1
+    try {
+      // First fetch page 1 to get total pages
+      const firstData = await fetchPage(1)
 
-    const res = await fetch(`/api/movie?${buildQueryParams(randomPage)}`)
-    const data = await res.json()
-    const results = data.results
+      if (!firstData.results || firstData.results.length === 0) {
+        setMovie(null)
+        return
+      }
 
-    if (results && results.length > 0) {
-      const unseen = results.filter(m => !watchedIdsRef.current.has(m.id) && !skippedIdsRef.current.has(m.id))
-      if (unseen.length > 0) {
-        setMovie(unseen[Math.floor(Math.random() * unseen.length)])
+      const totalPages = Math.min(firstData.total_pages, 300)
+      const randomPage = Math.floor(Math.random() * totalPages) + 1
+
+      const data = await fetchPage(randomPage)
+      const results = data.results
+
+      if (results && results.length > 0) {
+        const unseen = results.filter(m => !watchedIdsRef.current.has(m.id) && !skippedIdsRef.current.has(m.id))
+        if (unseen.length > 0) {
+          setMovie(unseen[Math.floor(Math.random() * unseen.length)])
+        } else {
+          setMovie(null)
+        }
       } else {
         setMovie(null)
       }
-    } else {
+    } catch (err) {
+      console.error(err)
       setMovie(null)
+      setFetchError("Couldn't load movies right now. Please try again in a moment.")
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   useEffect(() => {
@@ -232,7 +244,24 @@ function Movies() {
 
         {loading && <p style={{ color: 'var(--text-muted)' }}>Loading...</p>}
 
-        {!loading && !movie && <p style={{ color: 'var(--text-muted)' }}>No movies found with these filters. Try adjusting them.</p>}
+        {!loading && fetchError && (
+          <div style={{
+            padding: '0.6rem 1rem', marginBottom: '1rem', borderRadius: '6px',
+            background: '#E24B4A20', border: '0.5px solid #E24B4A',
+            color: '#E24B4A', fontSize: '13px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem',
+          }}>
+            {fetchError}
+            <button
+              onClick={fetchRandomMovie}
+              style={{ background: 'transparent', border: '0.5px solid #E24B4A', borderRadius: '6px', padding: '0.25rem 0.75rem', color: '#E24B4A', fontSize: '12px', cursor: 'pointer', flexShrink: 0 }}
+            >
+              Try again
+            </button>
+          </div>
+        )}
+
+        {!loading && !fetchError && !movie && <p style={{ color: 'var(--text-muted)' }}>No movies found with these filters. Try adjusting them.</p>}
 
         {!loading && movie && (
           <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>

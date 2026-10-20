@@ -3,6 +3,23 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 
 const PAGE_SIZE = 20
+const MAX_CONCURRENT_TMDB = 5
+
+// Like Promise.all(items.map(fn)), but with at most `limit` calls running at once.
+// Starts `limit` workers that each take the next item until none are left.
+// Results keep the same order as `items`.
+async function mapWithLimit(items, limit, fn) {
+  const results = new Array(items.length)
+  let next = 0
+  const worker = async () => {
+    while (next < items.length) {
+      const i = next++
+      results[i] = await fn(items[i])
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
+  return results
+}
 
 function Catalogue() {
   const { isAuthenticated, getToken } = useAuth()
@@ -26,13 +43,25 @@ function Catalogue() {
 
       setTotal(count)
 
-      const movieDetails = await Promise.all(
-        data.map(async (entry) => {
+      // Max 5 TMDB calls at a time to avoid hitting its rate limit
+      const movieDetails = await mapWithLimit(data, MAX_CONCURRENT_TMDB, async (entry) => {
+        const base = { dbId: entry.id, tmdb_id: entry.tmdb_id, rating: entry.rating, review: entry.review, created_at: entry.created_at }
+        try {
           const res = await fetch(`/api/movie?endpoint=movie/${entry.tmdb_id}&language=en-US`)
+          if (!res.ok) throw new Error(`Movie API returned ${res.status}`)
           const details = await res.json()
-          return { ...details, dbId: entry.id, tmdb_id: entry.tmdb_id, rating: entry.rating, review: entry.review, created_at: entry.created_at }
-        })
-      )
+          return { ...details, ...base }
+        } catch (err) {
+          console.error(`TMDB details failed for ${entry.tmdb_id}:`, err)
+          // Keep the row so it can still be seen and deleted
+          return { ...base, detailsMissing: true }
+        }
+      })
+
+      const failed = movieDetails.filter(m => m.detailsMissing).length
+      if (failed > 0) {
+        setNotice({ message: `Couldn't load details for ${failed} of ${movieDetails.length} movies. Try reloading the page.` })
+      }
 
       setMovies(movieDetails)
       setLoading(false)
@@ -126,7 +155,7 @@ function Catalogue() {
         <>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
             {movies.map(movie => (
-              <div key={movie.id} style={{
+              <div key={movie.dbId} style={{
                 display: 'flex', alignItems: 'center',
                 padding: '0.75rem 1.25rem',
                 background: 'var(--bg-surface)',
@@ -134,13 +163,19 @@ function Catalogue() {
                 borderRadius: '8px',
                 gap: '1rem',
               }}>
-                <img
-                  src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`}
-                  alt={movie.title}
-                  style={{ width: '36px', height: '54px', borderRadius: '4px', objectFit: 'cover', flexShrink: 0 }}
-                />
+                {movie.poster_path ? (
+                  <img
+                    src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`}
+                    alt={movie.title}
+                    style={{ width: '36px', height: '54px', borderRadius: '4px', objectFit: 'cover', flexShrink: 0 }}
+                  />
+                ) : (
+                  <div style={{ width: '36px', height: '54px', borderRadius: '4px', background: 'var(--bg-border)', flexShrink: 0 }} />
+                )}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <span style={{ fontSize: '14px', fontWeight: 500 }}>{movie.title}</span>
+                  <span style={{ fontSize: '14px', fontWeight: 500, color: movie.detailsMissing ? 'var(--text-muted)' : undefined }}>
+                    {movie.detailsMissing ? `Details unavailable (TMDB #${movie.tmdb_id})` : movie.title}
+                  </span>
                   <span style={{ fontSize: '13px', color: 'var(--text-muted)', marginLeft: '0.75rem' }}>
                     {movie.release_date?.slice(0, 4)}
                   </span>
