@@ -1,7 +1,16 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { IconArrowLeft, IconBrandGithub, IconExternalLink } from '@tabler/icons-react'
-import { schoolProjectsData } from '../data/SchoolProjectsData'
+import { schoolProjectsData, SHOW_LIVE_LINKS } from '../data/SchoolProjectsData'
+
+const linkStyle = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '0.4rem',
+  fontSize: '13px',
+  color: 'var(--accent)',
+  textDecoration: 'none',
+}
 
 function SchoolProject() {
   const { slug } = useParams()
@@ -18,6 +27,7 @@ function SchoolProject() {
   }
 
   const { label, semester, title, description, tech, groupSize, image, links } = project
+  const liveUrl = SHOW_LIVE_LINKS ? links?.live : null
 
   return (
     <main style={{ maxWidth: '680px', margin: '0 auto', padding: '4rem 2rem' }}>
@@ -90,45 +100,36 @@ function SchoolProject() {
         {groupSize > 1 ? `Group project (${groupSize} people)` : 'Solo project'}
       </p>
 
-      <div style={{ display: 'flex', gap: '1.5rem' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem 1.5rem' }}>
         {links?.github && (
-          <a
-            href={links.github}
-            target="_blank"
-            rel="noreferrer"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              fontSize: '13px',
-              color: 'var(--accent)',
-              textDecoration: 'none',
-            }}
-          >
+          <a href={links.github} target="_blank" rel="noreferrer" style={linkStyle}>
             <IconBrandGithub size={16} stroke={1.5} />
             View on GitHub
           </a>
         )}
 
-        {links?.live && (
-          <a
-            href={links.live}
-            target="_blank"
-            rel="noreferrer"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              fontSize: '13px',
-              color: 'var(--accent)',
-              textDecoration: 'none',
-            }}
-          >
+        {liveUrl ? (
+          <a href={liveUrl} target="_blank" rel="noreferrer" style={linkStyle}>
             <IconExternalLink size={16} stroke={1.5} />
             View live demo
           </a>
+        ) : links?.archive ? (
+          <a href={links.archive} target="_blank" rel="noreferrer" style={linkStyle}>
+            <IconExternalLink size={16} stroke={1.5} />
+            View archived demo
+          </a>
+        ) : (
+          <span style={{ ...linkStyle, color: 'var(--text-muted)' }}>
+            Live demo available on request
+          </span>
         )}
       </div>
+
+      {!liveUrl && links?.archive && (
+        <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+          The original site is no longer public. This is a snapshot from the Wayback Machine.
+        </p>
+      )}
     </main>
   )
 }

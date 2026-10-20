@@ -1,3 +1,7 @@
+// sayver.net is password protected for now, so the archive links are shown instead.
+// Set to true to show the live links again.
+export const SHOW_LIVE_LINKS = false
+
 export const schoolProjectsData = {
   web1100: {
     label: 'WEB1100',
