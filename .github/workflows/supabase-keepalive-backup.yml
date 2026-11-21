@@ -44,7 +44,7 @@ jobs:
           rm backup.sql
 
       - name: Last opp den krypterte backupen
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: supabase-backup-${{ github.run_number }}
           path: backup-*.sql.gpg
