@@ -1,0 +1,51 @@
+# Holder Supabase-prosjektet våkent (gratisplanen pauser etter en uke uten aktivitet)
+# og tar en kryptert backup av databasen hver søndag.
+name: Supabase keep-alive og backup
+
+on:
+  schedule:
+    - cron: "17 3 * * *"   # hver natt kl. 03:17 UTC: keep-alive
+    - cron: "47 3 * * 0"   # søndager kl. 03:47 UTC: backup
+  workflow_dispatch:        # gjør det mulig å starte jobben manuelt fra Actions-fanen
+
+permissions:
+  contents: read
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    container: postgres:17   # samme hovedversjon som databasen hos Supabase
+    steps:
+      - name: Spør databasen så den ikke går i dvale
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: psql "$DB_URL" -c "select count(*) from public.watched_movies;"
+
+  backup:
+    # Kjører bare på søndagsplanen eller når jobben startes manuelt
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '47 3 * * 0'
+    runs-on: ubuntu-latest
+    container: postgres:17
+    steps:
+      - name: Installer gpg
+        run: apt-get update && apt-get install -y --no-install-recommends gnupg
+
+      - name: Ta backup av public-skjemaet
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: pg_dump "$DB_URL" --schema=public --no-owner --no-privileges -f backup.sql
+
+      - name: Krypter backupen
+        env:
+          PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$PASSPHRASE" \
+            --symmetric --cipher-algo AES256 -o "backup-$(date +%F).sql.gpg" backup.sql
+          rm backup.sql
+
+      - name: Last opp den krypterte backupen
+        uses: actions/upload-artifact@v4
+        with:
+          name: supabase-backup-${{ github.run_number }}
+          path: backup-*.sql.gpg
+          retention-days: 90
